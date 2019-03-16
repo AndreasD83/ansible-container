@@ -1,0 +1,28 @@
+#cd /mnt/c/entwicklung/ansible/influxdb_grafana && ansible-playbook -i hosts influx_grafana.yml --ask-pass --ask-become-pass --user andreas
+- name: install influx_grafana
+  hosts: openhabian
+  become: true
+  
+  vars:
+   home_dir: "/home/andreas"
+   
+  
+  tasks:
+  - name: add repo key influxdb
+    become: yes
+    shell: 
+      curl -sL https://repos.influxdata.com/influxdb.key | apt-key add -
+  - apt:
+    name: influxdb
+    state: present
+  - service: name=influxdb state=restarted
+  
+  - name: add repo key grafana
+    become: yes
+    shell: 
+      curl https://packages.grafana.com/gpg.key | apt-key add -
+# Install grafana
+  - apt:
+    name: grafana
+    state: present
+  - service: name=grafana-server state=restarted
