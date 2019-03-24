@@ -1,4 +1,4 @@
-#cd /mnt/c/entwicklung/ansible/influxdb_grafana && ansible-playbook -i hosts influx_grafana.yml --ask-pass --ask-become-pass --user andreas
+#cd /mnt/c/Entwicklung/ansible/influxdb_grafana && ansible-playbook -i hosts influx_grafana.yml --ask-pass --ask-become-pass --user andreas
 - name: install influx_grafana
   hosts: openhabian
   become: true
@@ -26,3 +26,39 @@
     name: grafana
     state: present
   - service: name=grafana-server state=restarted
+  - name: Make sure grafana-server is running
+    systemd: state=started name=grafana-server enabled=true
+  - apt:
+    name: openjdk-12-jdk
+    state: present
+  #- name: Download file from a file path
+  #  shell:
+  #    wget https://services.gradle.org/distributions/gradle-5.0-bin.zip -P /tmp
+  - name: create folder
+    become: yes
+    shell: 
+      mkdir -p /opt/gradle
+  - apt:
+    name: unzip
+    state: present
+  - apt:
+    name: gradle
+    state: present
+  #- name: update gradle
+  #  become: yes
+  #  shell: 
+  #      add-apt-repository ppa:cwchien/gradle
+  #      apt-get update
+  #      apt upgrade gradle
+  - git:
+      repo: 'https://github.com/AndreasD83/rabbit'
+      dest: /home/openhabian/springboot_ultrasonic
+      force: yes
+  - name: gradle build
+    become: yes
+    shell: 
+      cd /home/openhabian/springboot_ultrasonic &&  gradle clean build
+  - name: springboot rabbitmq ---> influxdb start
+    become: yes
+    shell: 
+      java -jar /home/openhabian/springboot_ultrasonic/rabbitmq-1.0.0-SNAPSHOT.jar --spring.config.location=/home/openhabian/springboot_ultrasonic/application.properties&
