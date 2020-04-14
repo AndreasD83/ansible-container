@@ -1,8 +1,9 @@
 #cd /mnt/c/Entwicklung/ansible/influxdb_grafana && ansible-playbook -i hosts influx_grafana.yml --ask-pass --ask-become-pass --user andreas
 - name: install influx_grafana
-  hosts: openhabian
+  hosts: ubuntu
   become: true
-  
+  remote_user: ubuntu
+
   vars:
    home_dir: "/home/andreas"
    
@@ -10,27 +11,34 @@
   tasks:
   - name: add repo key influxdb
     become: yes
-    shell: 
-      curl -sL https://repos.influxdata.com/influxdb.key | apt-key add -
-  - apt:
-    name: influxdb
-    state: present
-  - service: name=influxdb state=restarted
-  
-  - name: add repo key grafana
+    shell: curl -sL https://repos.influxdata.com/influxdb.key | apt-key add -
+
+  - name:
     become: yes
-    shell: 
-      curl https://packages.grafana.com/gpg.key | apt-key add -
-# Install grafana
+    shell: sudo apt-get install -y software-properties-common wget
+ 
   - apt:
-    name: grafana
-    state: present
+     name: influxdb
+     state: present
+  - service: name=influxdb state=restarted
+
+  - apt:
+     name: influxdb-client
+  
+  - apt_repository:
+     repo: deb https://packages.grafana.com/oss/deb stable main
+     state: present
+
+  - apt:
+     name: grafana
+     state: present
   - service: name=grafana-server state=restarted
   - name: Make sure grafana-server is running
     systemd: state=started name=grafana-server enabled=true
+  
   - apt:
-    name: openjdk-12-jdk
-    state: present
+     name: openjdk-13-jdk
+     state: present
   #- name: Download file from a file path
   #  shell:
   #    wget https://services.gradle.org/distributions/gradle-5.0-bin.zip -P /tmp
@@ -39,11 +47,11 @@
     shell: 
       mkdir -p /opt/gradle
   - apt:
-    name: unzip
-    state: present
+     name: unzip
+     state: present
   - apt:
-    name: gradle
-    state: present
+     name: gradle
+     state: present
   #- name: update gradle
   #  become: yes
   #  shell: 

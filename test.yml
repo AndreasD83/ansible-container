@@ -1,0 +1,14 @@
+- name: install influx_grafana 
+  hosts: ubuntu 
+  become: true
+  remote_user: ubuntu
+
+  vars: 
+   home_dir: "/home/andreas"
+   
+  
+  tasks: 
+       - name: add repo key influxdb 
+         become: yes 
+         shell:
+               curl -sL https://repos.influxdata.com/influxdb.key | apt-key add -
