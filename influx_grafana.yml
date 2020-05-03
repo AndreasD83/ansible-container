@@ -26,17 +26,17 @@
 
   - apt:
      name: influxdb-client
-  - name: Create database
-    influxdb_database:
-      hostname: "{{influxdb_ip_address}}"
-      database_name: "{{influxdb_database_name}}"
-  - name: Create a user on localhost with privileges
-    influxdb_user:
-        user_name: ultra
-        user_password: ultra
-        grants:
-          - database: '{{influxdb_database_name}}'
-            privilege: 'WRITE'
+#  - name: Create database
+#    influxdb_database:
+#      hostname: "{{influxdb_ip_address}}"
+#      database_name: "{{influxdb_database_name}}"
+#  - name: Create a user on localhost with privileges
+#    influxdb_user:
+#        user_name: ultra
+#        user_password: ultra
+#        grants:
+#          - database: '{{influxdb_database_name}}'
+#            privilege: 'WRITE'
   - apt_repository:
      repo: deb https://packages.grafana.com/oss/deb stable main
      state: present
