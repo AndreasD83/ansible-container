@@ -1,48 +1,56 @@
 #cd /mnt/c/Entwicklung/ansible/influxdb_grafana && ansible-playbook -i hosts influx_grafana.yml --ask-pass --ask-become-pass --user andreas
 - name: install influx_grafana
-  hosts: local
+  hosts: ubuntu
   become: true
-  
+  remote_user: ubuntu
+
   vars:
    home_dir: "/home/andreas"
+   influxdb_ip_address: "ubuntu"
+   influxdb_database_name: ultrasonic
    
   
   tasks:
   - name: add repo key influxdb
     become: yes
-    shell: 
-      curl -sL https://repos.influxdata.com/influxdb.key | apt-key add -
+    shell: curl -sL https://repos.influxdata.com/influxdb.key | apt-key add -
+
+  - name:
+    become: yes
+    shell: sudo apt-get install -y software-properties-common wget
+ 
   - apt:
-    name: influxdb
-    state: present
+     name: influxdb
+     state: present
   - service: name=influxdb state=restarted
 
+  - apt:
+     name: influxdb-client
   - name: Create database
     influxdb_database:
-      hostname: "ubuntu"
-      database_name: "ultrasonic"
-  - name: Create an admin user on a remote host using custom login credentials
+      hostname: "{{influxdb_ip_address}}"
+      database_name: "{{influxdb_database_name}}"
+  - name: Create a user on localhost with privileges
     influxdb_user:
-      user_name: ultra
-      user_password: ultra
-      admin: no
-      hostname: "ubuntu"
-      login_username: "admin"
-      login_password: "admin"
-  - name: add repo key grafana
-    become: yes
-    shell: 
-      curl https://packages.grafana.com/gpg.key | apt-key add -
-# Install grafana
+        user_name: ultra
+        user_password: ultra
+        grants:
+          - database: {{influxdb_database_name}}
+            privilege: 'WRITE'
+  - apt_repository:
+     repo: deb https://packages.grafana.com/oss/deb stable main
+     state: present
+  
   - apt:
-    name: grafana
-    state: present
-  - service: name=grafana-server state=started
+     name: grafana
+     state: present
+  - service: name=grafana-server state=restarted
   - name: Make sure grafana-server is running
     systemd: state=started name=grafana-server enabled=true
+  
   - apt:
-    name: openjdk-12-jdk
-    state: present
+     name: openjdk-13-jdk
+     state: present
   #- name: Download file from a file path
   #  shell:
   #    wget https://services.gradle.org/distributions/gradle-5.0-bin.zip -P /tmp
@@ -51,11 +59,11 @@
     shell: 
       mkdir -p /opt/gradle
   - apt:
-    name: unzip
-    state: present
+     name: unzip
+     state: present
   - apt:
-    name: gradle
-    state: present
+     name: gradle
+     state: present
   #- name: update gradle
   #  become: yes
   #  shell: 
@@ -73,4 +81,4 @@
   - name: springboot rabbitmq ---> influxdb start
     become: yes
     shell: 
-      java -jar /home/openhabian/springboot_ultrasonic/build/libs/rabbitmq-1.0.0-SNAPSHOT.jar --spring.config.location=/home/openhabian/springboot_ultrasonic/src/main/resources/application.properties&
+      java -jar /home/openhabian/springboot_ultrasonic/rabbitmq-1.0.0-SNAPSHOT.jar --spring.config.location=/home/openhabian/springboot_ultrasonic/application.properties&
