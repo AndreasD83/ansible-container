@@ -35,7 +35,7 @@
         user_name: ultra
         user_password: ultra
         grants:
-          - database: {{influxdb_database_name}}
+          - database: '{{influxdb_database_name}}'
             privilege: 'WRITE'
   - apt_repository:
      repo: deb https://packages.grafana.com/oss/deb stable main
