@@ -7,7 +7,8 @@
   vars:
    home_dir: "/home/andreas"
    influxdb_ip_address: "ubuntu"
-   influxdb_database_name: ultrasonic
+   influxdb_database_name: "ultrasonic"
+   remote_user: "ubuntu"
    
   
   tasks:
