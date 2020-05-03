@@ -1,6 +1,6 @@
 #cd /mnt/c/Entwicklung/ansible/influxdb_grafana && ansible-playbook -i hosts influx_grafana.yml --ask-pass --ask-become-pass --user andreas
 - name: install influx_grafana
-  hosts: openhabian
+  hosts: local
   become: true
   
   vars:
@@ -16,7 +16,19 @@
     name: influxdb
     state: present
   - service: name=influxdb state=restarted
-  
+
+  - name: Create database
+    influxdb_database:
+      hostname: "ubuntu"
+      database_name: "ultrasonic"
+  - name: Create an admin user on a remote host using custom login credentials
+    influxdb_user:
+      user_name: ultra
+      user_password: ultra
+      admin: no
+      hostname: "ubuntu"
+      login_username: "admin"
+      login_password: "admin"
   - name: add repo key grafana
     become: yes
     shell: 
@@ -25,7 +37,7 @@
   - apt:
     name: grafana
     state: present
-  - service: name=grafana-server state=restarted
+  - service: name=grafana-server state=started
   - name: Make sure grafana-server is running
     systemd: state=started name=grafana-server enabled=true
   - apt:
@@ -61,4 +73,4 @@
   - name: springboot rabbitmq ---> influxdb start
     become: yes
     shell: 
-      java -jar /home/openhabian/springboot_ultrasonic/rabbitmq-1.0.0-SNAPSHOT.jar --spring.config.location=/home/openhabian/springboot_ultrasonic/application.properties&
+      java -jar /home/openhabian/springboot_ultrasonic/build/libs/rabbitmq-1.0.0-SNAPSHOT.jar --spring.config.location=/home/openhabian/springboot_ultrasonic/src/main/resources/application.properties&
