@@ -72,13 +72,13 @@
   #      apt upgrade gradle
   - git:
       repo: 'https://github.com/AndreasD83/rabbit'
-      dest: /home/openhabian/springboot_ultrasonic
+      dest: /home/{{remote_user}}/springboot_ultrasonic
       force: yes
   - name: gradle build
     become: yes
     shell: 
-      cd /home/openhabian/springboot_ultrasonic &&  gradle clean build
+      cd /home/{{remote_user}}/springboot_ultrasonic &&  gradle clean build
   - name: springboot rabbitmq ---> influxdb start
     become: yes
     shell: 
-      java -jar /home/openhabian/springboot_ultrasonic/rabbitmq-1.0.0-SNAPSHOT.jar --spring.config.location=/home/openhabian/springboot_ultrasonic/application.properties&
+      java -jar /home/{{remote_user}}/springboot_ultrasonic/rabbitmq-1.0.0-SNAPSHOT.jar --spring.config.location=/home/{{remote_user}}/springboot_ultrasonic/application.properties&
